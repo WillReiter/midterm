@@ -1,0 +1,215 @@
+import sys
+
+#read in funct from a file
+#convert each func to CNF form
+#write each CNF equation to the file CNF.txt
+
+def or_CNF(vars, y_string):
+    #print("CNF METHOD VARS: ", vars)
+    #print("CNF METHOD Y_STRING: ", y_string)
+    ret_lst = []
+    for x in vars:
+        num = x.strip()
+        #print(num)
+        str = ''
+        if(num[0] == '~'):
+            str = num[1:] + ' + '
+        else:
+            str = '~' + num + ' + '
+        str += y_string
+        ret_lst.append(str)
+    str = ''
+    for x in vars:
+        str += x.strip() + ' + '
+    str += '~' + y_string
+    ret_lst.append(str)
+
+    print("RETURN LIST OR: ", ret_lst)
+
+    return ret_lst
+        
+
+def and_CNF(vars, y_string):
+    #print("CNF METHOD VARS AND: ", vars)
+    #print("CNF METHOD Y_STRING: ", y_string)
+    ret_lst = []
+    for x in vars:
+        num = x.strip()
+        ynum = y_string.strip()
+        #print(num)
+        str = num + ' + '
+        if(ynum[0] == '~'):
+            str += ynum[1:]
+        else:
+            str += '~' + ynum 
+        ret_lst.append(str)
+    str = ''
+    for x in vars:
+        num = x.strip()
+        #print(num)
+        if(num[0] == '~'):
+            str += num[1:] + ' + '
+        else:
+            str += '~' + num + ' + '
+    str +=  y_string
+    ret_lst.append(str)
+
+    print("RETURN LIST AND: ", ret_lst)
+
+    return ret_lst
+
+def not_CNF(vars, y_string):
+    ret_lst = []
+    num = vars.strip()
+    str = num + ' + ' + y_string
+    ret_lst.append(str)
+    str = ''
+    if(num[0] == '~'):
+        num = num[1:]
+        str += num
+    else:
+        str += '~' + num
+    str += ' + ~' + y_string
+    ret_lst.append(str)
+
+    print("RETURN LIST NOT: ", ret_lst)
+    return ret_lst
+
+
+
+
+
+def main():
+
+    filename = sys.argv[1]
+    datalst = []
+    datafile = open(filename, "r") # had to add encoding ISO to get allbytes to work
+    for line in datafile:
+        datalst.append(line.strip())
+    datafile.close() # close data fp
+
+    print(datalst[0])
+    #print(datalst[1])
+
+    funNames = []
+    clauses = []
+    terms1 = []
+    terms2 = []
+    for x in datalst:
+        funNames.append(x.split('=')[0])
+        clauses.append(x.split('=')[1])
+    
+    for x in range(len(clauses)):
+        if x == 0:
+            terms1 = clauses[x].split('+')
+        elif x == 1:
+            terms2 = clauses[x].split('+')
+        else:
+            pass
+
+
+    print("function names: ", funNames)
+    print("clauses: ", clauses)
+    print("eq1 terms: ", terms1)
+    print('eq2 terms: ', terms2)
+
+    litterals1 = []
+    for x in terms1:
+        litterals1.append(x.split("."))
+
+
+    print("litterals1: ", litterals1)
+
+    #need to change the notted vars to y version
+
+    #get all the negated values in the equation, append them to a list, non-repeating
+    negVals = []
+    for x in range(len(litterals1)):
+        num = litterals1[x]
+        for y in range(len(num)):
+            check = num[y].strip()
+            if(check[0] == '~'):
+                if(check not in negVals):
+                    negVals.append(litterals1[x][y].strip())
+    print(negVals)
+
+    #for all the negative values, we will assign add it to a dictionary with corresponding yx value
+    diction = {}           
+    for x in range(len(negVals)):
+        diction.update({ str(negVals[x]).strip() : "y" + str(x)})
+    print(diction)
+
+    or_lst = []
+    for x in litterals1:
+        if (len(x) == 1):
+            strr = str(x[0]).strip()
+            #strr = 'p'
+            print(strr)
+            if(strr in diction):#in dictionary
+                #print("TEST", diction[strr])
+                or_lst.append(str(diction[strr]))
+            else:
+                or_lst.append(x[0])
+
+
+    #now we will updated the litterals like using the newly created dictionary
+    for x in range(len(litterals1)):
+        #print("outlit: ",litterals1[x])
+        for y in range(len(litterals1[x])):
+            currentLit = str(litterals1[x][y]).strip()
+            #print("CHECK lit: ", currentLit)
+            #print("CHECK keys: ", diction.keys())
+            if(str(currentLit).strip() in diction):
+                #print("CHECK2: ", diction[currentLit])
+                litterals1[x][y] = diction[currentLit]
+            
+    print("litterals1 updated: ", litterals1)
+
+
+    #here we want to call the CNF AND functino for all of these litterals
+
+    y_outs = []
+
+    #first thing to append to the final output are the nots
+    for x in diction:
+        if(x[0] == '~'):
+            y_outs.append((not_CNF(x[1:], diction[x]))[0])
+            y_outs.append((not_CNF(x[1:], diction[x]))[1])
+        else:
+            y_outs.append((not_CNF(x, diction[x]))[0])
+            y_outs.append((not_CNF(x, diction[x]))[1])
+
+    print("Y OUTS: ", y_outs)
+
+
+    print("lit len: ", len(litterals1))
+    for x in range(len(litterals1)-1):
+        ystr = 'y' + str(x + len(diction))
+        print("TESTING Y STRING: ", ystr)
+        result = and_CNF(litterals1[x], ystr)
+        or_lst.append(ystr)
+        for y in result:
+            y_outs.append(y)
+    
+    print(y_outs)
+    print(or_lst)
+    print()
+    or_out_CNF = (or_CNF(or_lst, "z"))
+
+    for x in or_out_CNF:
+        y_outs.append(x)
+
+    print("Final CNF")
+
+    for x in y_outs:
+        print (x)
+    
+    writeToFile = open("CNF.txt", "w", encoding="ISO-8859-1") # had to add encoding ISO to get allbytes to work
+    writeToFile.write('CNF = ')
+    for x in y_outs:
+        writeToFile.write('[' + str(x) + ']')
+    writeToFile.close()
+
+
+if __name__ == '__main__':
+    main()
