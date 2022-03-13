@@ -109,8 +109,8 @@ def main():
         datalst.append(line.strip())
     datafile.close() # close data fp
 
-    print(datalst[0])
-    print(datalst[1])
+    #print(datalst[0])
+    #print(datalst[1])
 
     lstWrite = []
 
@@ -162,7 +162,7 @@ def main():
         diction = {}           
         for x in range(len(negVals)):
             diction.update({ str(negVals[x]).strip() : "y" + str(x)})
-        print(diction)
+        print("Diction: ", diction)
 
         or_lst = []
         for x in litterals1:
@@ -211,10 +211,11 @@ def main():
         for x in range(len(litterals1)-1):
             ystr = 'y' + str(x + len(diction))
             print("TESTING Y STRING: ", ystr)
-            result = and_CNF(litterals1[x], ystr)
-            or_lst.append(ystr)
-            for y in result:
-                y_outs.append(y)
+            if(len(litterals1[x]) > 1):
+                result = and_CNF(litterals1[x], ystr)
+                or_lst.append(ystr)
+                for y in result:
+                    y_outs.append(y)
         
         print(y_outs)
         print(or_lst)
@@ -243,6 +244,7 @@ def main():
     xorLst = []
     if(len(lstWrite) == 2):
         #call xor with z0 and z1
+        print("XORing")
         xorLst = xor_CNF(['z0', 'z1'], 'z2')
         saveString = ''
         for x in xorLst:

@@ -134,13 +134,7 @@ def algorithm(c, cInts, a, ca,  u, sat, unsat, binary, tl):
         for x in CNF_MAIN:
             c.append(x)
         cInts = copy.deepcopy(c)
-        '''for y in CNF_DUP:
-            cInts.append(y)'''
 
-        '''print("CHECKINGGGGG")
-        print(c)
-        print(cInts)
-        print("CHECKINGGGGG")'''
         a = ca.copy()
         u = []
         currentVar = a[0]
@@ -157,7 +151,7 @@ def algorithm(c, cInts, a, ca,  u, sat, unsat, binary, tl):
         updateStrNOT = '1'
     else:
         updateStrNOT = '0'
-    print("length of c: ", len(c))
+    #print("length of c: ", len(c))
     a.remove(currentVar) #remove the current variable from the list of available
     u.append(currentVar) #append the current variable to the list of used variables
     for x in range(len(c)): #for each clause
@@ -165,15 +159,14 @@ def algorithm(c, cInts, a, ca,  u, sat, unsat, binary, tl):
         for y in range(len(c[x])): #for each element in the clause
             #print("here")
             if(c[x][y][0] == '~'): # if the element is notted
-                print("here not")
                 if(c[x][y][1:] == currentVar):
                     cInts[x][y] = updateStrNOT
             elif(c[x][y] == currentVar):
-                print("hereerereerererererer")
                 cInts[x][y] = updateStr
 
-    print(c)
-    print(cInts)
+    #UNCOMMENT THESE TO VIEW LISTS AT EACH STEP
+    #print(c)
+    #print(cInts)
 
     if(('0' in binary)):
         for x in cInts: #for each clause
@@ -212,28 +205,11 @@ def algorithm(c, cInts, a, ca,  u, sat, unsat, binary, tl):
 
     if(len(binary) > len(ca)):
         print("basecase met!")
-        for y in unsat:
-            print(x)
         for x in sat:
             SAT_MAIN.append(x) #update gloabl var
         return 0
     else:
         algorithm(c, cInts , a , ca,  u , sat, unsat, binary, tl)
-
-
-
-
-
-
-
-
-
-     
-
-
-
-
-
 
 
 if __name__ == '__main__':
